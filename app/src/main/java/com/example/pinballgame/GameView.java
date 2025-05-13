@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -12,11 +13,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     private GameThread thread;
 
-    // Bola
     private float ballX, ballY, ballRadius = 30;
     private float ballSpeedX = 5, ballSpeedY = 5;
 
-    // Paletas
     private float paddleWidth = 200;
     private float paddleHeight = 30;
     private float leftPaddleX, leftPaddleY;
@@ -26,6 +25,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     public GameView(Context context) {
         super(context);
+        init();
+    }
+
+    public GameView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    private void init() {
         getHolder().addCallback(this);
         thread = new GameThread(getHolder(), this);
         setFocusable(true);
@@ -65,7 +73,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         ballX += ballSpeedX;
         ballY += ballSpeedY;
 
-        // Rebater nas paredes
         if (ballX < ballRadius || ballX > getWidth() - ballRadius) {
             ballSpeedX = -ballSpeedX;
         }
@@ -74,7 +81,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             ballSpeedY = -ballSpeedY;
         }
 
-        // Rebater nas paletas
         if (ballY + ballRadius >= leftPaddleY &&
                 ballX > leftPaddleX && ballX < leftPaddleX + paddleWidth) {
             ballSpeedY = -Math.abs(ballSpeedY);
@@ -85,7 +91,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             ballSpeedY = -Math.abs(ballSpeedY);
         }
 
-        // Se a bola cair
         if (ballY > getHeight()) {
             ballX = getWidth() / 2f;
             ballY = getHeight() / 3f;
@@ -128,16 +133,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             Paint paint = new Paint();
             paint.setAntiAlias(true);
 
-            // Desenha a bola
             paint.setColor(Color.WHITE);
             canvas.drawCircle(ballX, ballY, ballRadius, paint);
 
-            // Paleta esquerda
             paint.setColor(isLeftPressed ? Color.YELLOW : Color.RED);
             canvas.drawRect(leftPaddleX, leftPaddleY,
                     leftPaddleX + paddleWidth, leftPaddleY + paddleHeight, paint);
 
-            // Paleta direita
             paint.setColor(isRightPressed ? Color.YELLOW : Color.RED);
             canvas.drawRect(rightPaddleX, rightPaddleY,
                     rightPaddleX + paddleWidth, rightPaddleY + paddleHeight, paint);
@@ -175,7 +177,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 }
 
                 try {
-                    sleep(16); // ~60 FPS
+                    sleep(16);
                 } catch (InterruptedException e) {}
             }
         }
